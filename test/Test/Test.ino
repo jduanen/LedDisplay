@@ -26,11 +26,13 @@
 
 #define PIXEL_DEPTH         2
 
+#define BLACK_COLOR         0b00000000
 #define GREEN_COLOR         0b00000001
 #define RED_COLOR           0b00000010
 #define AMBER_COLOR         (GREEN_COLOR | RED_COLOR)
 
-#define NUM_COLORS          2
+#define NUM_COLORS          4
+#define NUM_LED_COLORS      2
 
 #define NUM_BUFS            3
 
@@ -49,7 +51,7 @@ byte colors[] = {GREEN_COLOR, RED_COLOR};
 byte frameBuffers[NUM_BUFS][NUM_ROWS][NUM_COLS] = {};
 byte curRow = 0;
 byte refreshBufNum = NONE;
-byte renderBufNum = NONE;
+uint32_t renderBufNum = NONE;
 uint32_t ledsOnDelay = DEF_LEDS_ON_DELAY;
 uint32_t loopCnt = 0;
 uint32_t loop1Cnt = 0;
@@ -107,7 +109,7 @@ void patternBuf(uint32_t bufNum, uint32_t pattNum) {
     case CHECK_PATTERN:
         for (uint32_t row = 0; (row < NUM_ROWS); row++) {
             for (uint32_t col = 0; (col < NUM_COLS); col++) {
-                frameBuffers[bufNum][row][col] = ((col + (row % (NUM_COLORS + 2))) % (NUM_COLORS + 2));
+                frameBuffers[bufNum][row][col] = ((col + (row % NUM_COLORS)) % NUM_COLORS);
             }
         }
         break;
@@ -129,13 +131,17 @@ byte getBrightness() {
 }
 
 void setup() {
+    // N.B. the delay values are necessary for correct function
     Serial.begin(115200);
-    delay(1000);  // N.B. this delay value is necessary for correct function
+    delay(500);
     Serial.println("\nBEGIN: Render Loop");
+    delay(500);
     Serial.println("READY: Render Loop");
 };
 
 void setup1() {
+    // N.B. the delay values are necessary for correct function
+    delay(500);
     Serial.println("\nBEGIN: Refresh Loop");
     pinMode(ROW_0, OUTPUT);
     pinMode(ROW_1, OUTPUT);
@@ -157,7 +163,7 @@ void setup1() {
         rp2040.fifo.push(bufNum);
     }
     setBrightness(50);
-    delay(1500);  // N.B. this delay has to be here and in this amount
+    delay(1000);
 
     Serial.print("READY: Refresh Loop; ");
     Serial.print("Brightness: " + String(getBrightness()) + "%, ");
@@ -209,33 +215,82 @@ void shiftInPixels(int bufNum, int row, int color) {
 
 uint32_t pNum = 0;
 
-#define TEST_MODE       FIXED_PATTERN
-//#define TEST_MODE       CYCLE_PATTERNS
-#define FIXED_PATTERN   0
-#define CYCLE_PATTERNS  1
+#define TEST_MODE           RAMP_BRIGHTNESS
+//#define TEST_MODE           CYCLE_BRIGHTNESS
+//#define TEST_MODE           FIXED_PATTERN
+//#define TEST_MODE           CYCLE_PATTERNS
+#define FIXED_PATTERN       0
+#define CYCLE_PATTERNS      1
+#define CYCLE_BRIGHTNESS    2
+#define RAMP_BRIGHTNESS     3
 
 // Render loop
 void loop() {
+    uint32_t pattern;
+    uint32_t numLoops;
+    uint32_t brightness;
+
     switch (TEST_MODE) {
     case FIXED_PATTERN:
-        // fill all bufs with chosen pattern at the start
+        // at the start, fill one buf with chosen pattern
+        pattern = ALL_AMBER_PATTERN; // CHECK_PATTERN
         if (loopCnt == 0) {
-            for (renderBufNum = 0; (renderBufNum < NUM_BUFS); renderBufNum++) {
-//                patternBuf(renderBufNum, CHECK_PATTERN);
-                patternBuf(renderBufNum, ALL_AMBER_PATTERN);
-                rp2040.fifo.push(renderBufNum);
-            }
+            assert(rp2040.fifo.available());
+            renderBufNum = rp2040.fifo.pop();
+            patternBuf(renderBufNum, pattern);
+            rp2040.fifo.push(renderBufNum);
         }
         break;
     case CYCLE_PATTERNS:
-        if ((loopCnt % 3) == 0) {  // try to generate new pattern every third loop
-            uint32_t bNum;
-            if (rp2040.fifo.pop_nb(&bNum)) {
-                renderBufNum = bNum;
+        numLoops = 3;
+        if ((loopCnt % numLoops) == 0) {
+            if (rp2040.fifo.pop_nb(&renderBufNum)) {
                 pNum = ((pNum + 1) % NUM_PATTERNS);
                 patternBuf(renderBufNum, pNum);
                 rp2040.fifo.push(renderBufNum);
             }
+        }
+        break;
+    case CYCLE_BRIGHTNESS:
+        numLoops = 10;
+        if ((loopCnt % numLoops) == 0) {
+            renderBufNum = rp2040.fifo.pop();
+            pattern = ALL_AMBER_PATTERN;
+            switch (getBrightness()) {
+            case 0:
+                brightness = 22;
+                break;
+            case 25:
+                brightness = 50;
+                break;
+            case 50:
+                brightness = 75;
+                break;
+            case 75:
+                brightness = 100;
+                break;
+            case 100:
+                brightness = 0;
+                break;
+            default:
+                break;
+            }
+            setBrightness(brightness);
+            patternBuf(renderBufNum, pattern);
+//            Serial.println("##: " + String(getBrightness()) + ", " + String(renderBufNum) + ", " + String(pattern));
+            rp2040.fifo.push(renderBufNum);
+        }
+        break;
+    case RAMP_BRIGHTNESS:
+        numLoops = 10;
+        if ((loopCnt % numLoops) == 0) {
+            renderBufNum = rp2040.fifo.pop();
+            pattern = ALL_AMBER_PATTERN;
+            brightness = ((getBrightness() + 1) % 10);
+            setBrightness(brightness);
+            patternBuf(renderBufNum, pattern);
+//            Serial.println("###: " + String(getBrightness()) + ", " + String(renderBufNum) + ", " + String(pattern));
+            rp2040.fifo.push(renderBufNum);
         }
         break;
     default:
@@ -261,13 +316,13 @@ void loop1() {
         }
     }
 
-    for (uint32_t color = 0; (color < NUM_COLORS); color++) {
+    for (uint32_t color = 0; (color < NUM_LED_COLORS); color++) {
         assert((refreshBufNum >= 0) && (refreshBufNum < NUM_BUFS));
         shiftInPixels(refreshBufNum, curRow, colors[color]);
         enableRow(colors[color], curRow);
         delayMicroseconds(ledsOnDelay);
         disableRows();
     }
-    curRow = (curRow + 1) % NUM_ROWS;
+    curRow = ((curRow + 1) % NUM_ROWS);
     delayMicroseconds(INTER_ROW_DELAY);
 };
