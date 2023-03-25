@@ -11,6 +11,8 @@
 #define DEF_LEDS_ON_DELAY   (ROW_DELAY / 2)   // .5 msec (50% brightness)
 #define MIN_LEDS_ON_DELAY   ROW_DELAY         //  1 msec (100% brightness)
 
+#define DEF_BRIGHTNESS      50  // 50% brightness
+
 #define ROW_0               D0
 #define ROW_1               D1
 #define ROW_2               D2
@@ -162,7 +164,7 @@ void setup1() {
     for (uint32_t bufNum = 0; (bufNum < NUM_BUFS); bufNum++) {
         rp2040.fifo.push(bufNum);
     }
-    setBrightness(50);
+    setBrightness(DEF_BRIGHTNESS);
     delay(1000);
 
     Serial.print("READY: Refresh Loop; ");
