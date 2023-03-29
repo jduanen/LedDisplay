@@ -7,7 +7,7 @@
 
 // N.B. run this in loop1
 Refresh::Refresh() {
-    Serial.println("\nRefresh Loop: BEGIN");
+//    Serial.println("\nRefresh Loop: BEGIN");
     init();
 };
 
@@ -15,7 +15,7 @@ Refresh::Refresh() {
 Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
                  uint8_t greenLedsEnable, uint8_t redLedsEnable,
                  uint8_t columnData, uint8_t columnStrobe, uint8_t columnClock) {
-    Serial.println("\nRefresh Loop: BEGIN2");
+//    Serial.println("\nRefresh Loop: BEGIN2");
     _row0 = row0;
     _row1 = row1;
     _row2 = row2;
@@ -28,6 +28,7 @@ Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
 };
 
 void Refresh::init() {
+//    Serial.println("Refresh Init");
     pinMode(_row0, OUTPUT);
     pinMode(_row1, OUTPUT);
     pinMode(_row2, OUTPUT);
@@ -43,17 +44,20 @@ void Refresh::init() {
     pinMode(_columnClock, OUTPUT);
     digitalWrite(_columnClock, LOW);
 
-    // all FB bufs start off as free
-    for (uint32_t bufNum = 0; (bufNum < NUM_BUFS); bufNum++) {
-        rp2040.fifo.push(bufNum);
-    }
     setBrightness(DEF_BRIGHTNESS);
-    Serial.println("Refresh starting");
+//    Serial.println("Refresh starting");
 };
 
 Refresh::~Refresh() {
     //// give buffer back
     Serial.println("Refresh stopped");
+};
+
+// N.B. this must be run on the Refresh core as it pushes all buffers to the Render core
+void Refresh::freeAllBuffers() {
+    for (uint32_t bufNum = 0; (bufNum < NUM_BUFS); bufNum++) {
+        rp2040.fifo.push(bufNum);
+    }
 };
 
 void Refresh::setBrightness(byte percent) {
@@ -136,6 +140,8 @@ void Refresh::refresh() {
     delayMicroseconds(INTER_ROW_DELAY);
 };
 
-Refresh::frameBuffersPtr Refresh::getFrameBuffersPtr() {
+/*
+Refresh::frameBuffer *Refresh::getFrameBuffersPtr() {
     return(&_frameBuffers);
 }
+*/

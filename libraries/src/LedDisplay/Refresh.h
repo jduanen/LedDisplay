@@ -45,7 +45,7 @@ uint8_t colors[] = {GREEN_COLOR, RED_COLOR};
 
 class Refresh {
   public:
-    typedef uint8_t (*frameBuffersPtr)[NUM_BUFS][NUM_ROWS][NUM_COLS];
+    typedef uint8_t frameBuffer[NUM_BUFS][NUM_ROWS][NUM_COLS];
 
     Refresh();
     Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
@@ -54,13 +54,22 @@ class Refresh {
     ~Refresh();
 
     void refresh();
+//    frameBuffer *getFrameBuffersPtr();
+    void freeAllBuffers();    // N.B. this must be run on the Refresh core
 
     uint8_t getBrightness();
     void setBrightness(byte percent);
-    frameBuffersPtr getFrameBuffersPtr();
+
+    frameBuffer _frameBuffers = {};  //// TMP TMP TMP
 
   protected:
-    uint8_t _frameBuffers[NUM_BUFS][NUM_ROWS][NUM_COLS] = {};
+//    frameBuffer _frameBuffers = {};
+
+    void shiftInPixels(int bufNum, int row, int color);
+    void disableRows();
+    void enableRow(int rowColor, int rowNum);
+
+  private:
     uint32_t _ledsOnDelay = DEF_LEDS_ON_DELAY;
     uint8_t _curRow = 0;
     uint8_t _refreshBufNum = -1;  // unallocated
@@ -74,9 +83,6 @@ class Refresh {
     uint8_t _columnClock = DEF_COL_CLOCK;
 
     void init();
-    void shiftInPixels(int bufNum, int row, int color);
-    void disableRows();
-    void enableRow(int rowColor, int rowNum);
 };
 
 #include "Refresh.hpp"
