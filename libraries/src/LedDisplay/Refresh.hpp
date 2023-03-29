@@ -139,9 +139,3 @@ void Refresh::refresh() {
     _curRow = ((_curRow + 1) % NUM_ROWS);
     delayMicroseconds(INTER_ROW_DELAY);
 };
-
-/*
-Refresh::frameBuffer *Refresh::getFrameBuffersPtr() {
-    return(&_frameBuffers);
-}
-*/

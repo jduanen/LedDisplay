@@ -60,10 +60,8 @@ class Refresh {
     uint8_t getBrightness();
     void setBrightness(byte percent);
 
-    frameBuffer _frameBuffers = {};  //// TMP TMP TMP
-
   protected:
-//    frameBuffer _frameBuffers = {};
+    frameBuffer _frameBuffers = {};
 
     void shiftInPixels(int bufNum, int row, int color);
     void disableRows();
