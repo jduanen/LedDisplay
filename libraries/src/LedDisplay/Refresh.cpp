@@ -3,6 +3,3 @@
  * LedDisplay Refresh Function for XIAO RP2040
  * 
  ****************************************************************************/
-
-#include "LedDisplay_Render.h"
-

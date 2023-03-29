@@ -7,6 +7,9 @@
 #ifndef _LED_DISPLAY_RENDER_H_
 #define _LED_DISPLAY_RENDER_H_
 
+#include "Refresh.h"
+
+
 #define BLACK_COLORLIGHTS   0b00000000
 #define GREEN_COLORLIGHTS   0b00000001
 #define RED_COLORLIGHTS     0b00000010
@@ -17,18 +20,15 @@
 #define NONE                -1
 
 
-class LedDisplay_Render: public {
+class Render: Refresh {
 public:
+    void setPixel(byte col, byte row, byte color);
     void show();
-    void refresh();
-    byte getBrightness();
-    void setBrightness(byte percent);
-
-    byte _frameBuffers[NUM_BUFS][NUM_ROWS][NUM_COLS] = {};
-    byte _bufferNum = NONE;
 protected:
+    byte _frameBuffers[NUM_BUFS][NUM_ROWS][NUM_COLS] = {};
     ?
 private:
+    byte _bufferNum = NONE;
     ?
 };
 

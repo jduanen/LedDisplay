@@ -4,20 +4,17 @@
  * 
  ****************************************************************************/
 
-#include "Refresh.h"
-
 
 // N.B. run this in loop1
-Refresh::Refresh(): {
+Refresh::Refresh() {
     Serial.println("\nRefresh Loop: BEGIN");
     init();
 };
 
-/*
 // N.B. run this in loop1
 Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
                  uint8_t greenLedsEnable, uint8_t redLedsEnable,
-                 uint8_t columnData, uint8_t columnStrobe, uint8_t columnClock): {
+                 uint8_t columnData, uint8_t columnStrobe, uint8_t columnClock) {
     Serial.println("\nRefresh Loop: BEGIN2");
     _row0 = row0;
     _row1 = row1;
@@ -29,9 +26,8 @@ Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
     _columnClock = columnClock;
     init();
 };
-*/
 
-Refresh::init() {
+void Refresh::init() {
     pinMode(_row0, OUTPUT);
     pinMode(_row1, OUTPUT);
     pinMode(_row2, OUTPUT);
@@ -52,23 +48,23 @@ Refresh::init() {
         rp2040.fifo.push(bufNum);
     }
     setBrightness(DEF_BRIGHTNESS);
-    Serial.println("Refresh starting")
+    Serial.println("Refresh starting");
 };
 
 Refresh::~Refresh() {
     //// give buffer back
-    Serial.println("Refresh stopped")
+    Serial.println("Refresh stopped");
 };
 
 void Refresh::setBrightness(byte percent) {
     // int <newvalue> = map(<value>, <original_min>, <original_max>, <new_min>, <new_max>);
     assert((percent >= 0) && (percent <= 100));
-    ledsOnDelay = map(percent, 0, 100, MAX_LEDS_ON_DELAY, MIN_LEDS_ON_DELAY);
+    _ledsOnDelay = map(percent, 0, 100, MAX_LEDS_ON_DELAY, MIN_LEDS_ON_DELAY);
 };
 
 byte Refresh::getBrightness() {
     // int <newvalue> = map(<value>, <original_min>, <original_max>, <new_min>, <new_max>);
-    return map(ledsOnDelay, MAX_LEDS_ON_DELAY, MIN_LEDS_ON_DELAY, 0, 100);
+    return map(_ledsOnDelay, MAX_LEDS_ON_DELAY, MIN_LEDS_ON_DELAY, 0, 100);
 };
 
 void Refresh::enableRow(int rowColor, int rowNum) {
@@ -116,7 +112,7 @@ void Refresh::shiftInPixels(int bufNum, int row, int color) {
 
 
 // N.B. run this in loop1
-void Render::refresh() {
+void Refresh::refresh() {
     if (_curRow == 0) {
         while (rp2040.fifo.available() > 0) {
 //            Serial.print("Refresh: avail=" + String(rp2040.fifo.available()) + ", ");
@@ -139,3 +135,7 @@ void Render::refresh() {
     _curRow = ((_curRow + 1) % NUM_ROWS);
     delayMicroseconds(INTER_ROW_DELAY);
 };
+
+Refresh::frameBuffersPtr Refresh::getFrameBuffersPtr() {
+    return(&_frameBuffers);
+}
