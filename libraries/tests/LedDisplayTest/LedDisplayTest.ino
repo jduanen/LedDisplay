@@ -8,9 +8,9 @@
 #include "Render.h"
 
 
-#define STRIPES_PAT 0
-#define LED_PAT     STRIPES_PAT
-#define NUM_PATS    1
+#define STRIPES_PAT     0
+#define LED_PAT         STRIPES_PAT
+#define NUM_PATS        1
 
 
 Render *ledDisplayPtr;
