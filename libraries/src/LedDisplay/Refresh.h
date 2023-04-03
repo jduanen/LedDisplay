@@ -40,6 +40,9 @@
 #define NUM_LED_COLORS      2
 
 
+#define BUF_NUM_VALID(num)  ((num >= 0) && (num < NUM_BUFS))
+
+
 uint8_t colors[] = {GREEN_COLOR, RED_COLOR};
 
 
@@ -53,9 +56,8 @@ class Refresh {
             uint8_t columnData, uint8_t columnStrobe, uint8_t columnClock);
     ~Refresh();
 
+    void refreshInit();    // N.B. this must be run on the Refresh core
     void refresh();
-//    frameBuffer *getFrameBuffersPtr();
-    void freeAllBuffers();    // N.B. this must be run on the Refresh core
 
     uint8_t getBrightness();
     void setBrightness(byte percent);

@@ -7,7 +7,7 @@
 
 // N.B. run this in loop1
 Refresh::Refresh() {
-//    Serial.println("\nRefresh Loop: BEGIN");
+    Serial.println("\nRefresh Loop: BEGIN");
     init();
 };
 
@@ -28,7 +28,7 @@ Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
 };
 
 void Refresh::init() {
-//    Serial.println("Refresh Init");
+    Serial.println("Refresh Init");
     pinMode(_row0, OUTPUT);
     pinMode(_row1, OUTPUT);
     pinMode(_row2, OUTPUT);
@@ -45,19 +45,12 @@ void Refresh::init() {
     digitalWrite(_columnClock, LOW);
 
     setBrightness(DEF_BRIGHTNESS);
-//    Serial.println("Refresh starting");
+    Serial.println("Refresh starting");
 };
 
 Refresh::~Refresh() {
     //// give buffer back
     Serial.println("Refresh stopped");
-};
-
-// N.B. this must be run on the Refresh core as it pushes all buffers to the Render core
-void Refresh::freeAllBuffers() {
-    for (uint32_t bufNum = 0; (bufNum < NUM_BUFS); bufNum++) {
-        rp2040.fifo.push(bufNum);
-    }
 };
 
 void Refresh::setBrightness(byte percent) {
@@ -100,6 +93,7 @@ void Refresh::disableRows() {
 };
 
 void Refresh::shiftInPixels(int bufNum, int row, int color) {
+    //// FIXME change the row & column directions -- origins: SW=upper left, HW=upper right
     for (uint32_t col = 0; (col < NUM_COLS); col++) {
         // clock in data
         digitalWrite(_columnClock, LOW);
@@ -114,28 +108,35 @@ void Refresh::shiftInPixels(int bufNum, int row, int color) {
     digitalWrite(_columnData, LOW);
 };
 
+// N.B. this must be run on the Refresh core as it pushes all buffers to the Render core
+void Refresh::refreshInit() {
+    // free all buffers by pushing them to the render core
+    for (uint32_t bufNum = 0; (bufNum < NUM_BUFS); bufNum++) {
+        rp2040.fifo.push(bufNum);
+    }
+};
 
 // N.B. run this in loop1
 void Refresh::refresh() {
-    if (_curRow == 0) {
-        while (rp2040.fifo.available() > 0) {
-//            Serial.print("Refresh: avail=" + String(rp2040.fifo.available()) + ", ");
-            if ((_refreshBufNum >= 0) && (_refreshBufNum < NUM_BUFS)) {
-                rp2040.fifo.push(_refreshBufNum);
-//                Serial.print("returned: " + String(_refreshBufNum) + ", ");
-            }
-            _refreshBufNum = rp2040.fifo.pop();  // blocking
-//            Serial.println("new refreshBufNum: " + String(_refreshBufNum));
+    while (rp2040.fifo.available() > 0) {
+//        Serial.print("Refresh: avail=" + String(rp2040.fifo.available()) + ", ");
+        if (BUF_NUM_VALID(_refreshBufNum)) {
+            rp2040.fifo.push(_refreshBufNum);
+//            Serial.print("returned: " + String(_refreshBufNum) + ", ");
         }
+        _refreshBufNum = rp2040.fifo.pop();  // blocking
+//        Serial.println("new refreshBufNum: " + String(_refreshBufNum));
     }
 
-    for (uint32_t color = 0; (color < NUM_LED_COLORS); color++) {
-        assert((_refreshBufNum >= 0) && (_refreshBufNum < NUM_BUFS));
-        shiftInPixels(_refreshBufNum, _curRow, colors[color]);
-        enableRow(colors[color], _curRow);
-        delayMicroseconds(_ledsOnDelay);
-        disableRows();
+    if (BUF_NUM_VALID(_refreshBufNum)) {
+        for (uint32_t color = 0; (color < NUM_LED_COLORS); color++) {
+            assert((_refreshBufNum >= 0) && (_refreshBufNum < NUM_BUFS));
+            shiftInPixels(_refreshBufNum, _curRow, colors[color]);
+            enableRow(colors[color], _curRow);
+            delayMicroseconds(_ledsOnDelay);
+            disableRows();
+        }
+        _curRow = ((_curRow + 1) % NUM_ROWS);
+        delayMicroseconds(INTER_ROW_DELAY);
     }
-    _curRow = ((_curRow + 1) % NUM_ROWS);
-    delayMicroseconds(INTER_ROW_DELAY);
 };
