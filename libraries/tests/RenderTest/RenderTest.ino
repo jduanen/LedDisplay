@@ -34,64 +34,71 @@ uint32_t loopCnt = 0;
 uint32_t loop1Cnt = 0;
 
 
-Render render();
+Render *renderPtr;
 
 
-void patternBuf(uint32_t bufNum, uint32_t pattNum) {
+uint32_t row;
+uint32_t col;
+uint32_t color;
+
+void writePattern(uint32_t pattNum) {
     uint32_t i;
-    Refresh::frameBuffersPtr fBufsPtr = refreshPtr->getFrameBuffersPtr();
+
+    row = 0;
+    col = 0;
+    color = BLACK_COLOR;
 
     //// assert(pattNum < NUM_PATTERNS);
     switch (pattNum) {
     case ALL_CLEAR_PATTERN:
-        for (uint32_t row = 0; (row < NUM_ROWS); row++) {
-            for (uint32_t col = 0; (col < NUM_COLS); col++) {
-                (*fBufsPtr)[bufNum][row][col] = 0;
+        for (row = 0; (row < NUM_ROWS); row++) {
+            for (col = 0; (col < NUM_COLS); col++) {
+                renderPtr->setPixel(col, row, BLACK_COLOR);
             }
         }
         break;
     case ALL_RED_PATTERN:
-        for (uint32_t row = 0; (row < NUM_ROWS); row++) {
-            for (uint32_t col = 0; (col < NUM_COLS); col++) {
-                (*fBufsPtr)[bufNum][row][col] = RED_COLOR;
+        for (row = 0; (row < NUM_ROWS); row++) {
+            for (col = 0; (col < NUM_COLS); col++) {
+                renderPtr->setPixel(col, row, RED_COLOR);
             }
         }
         break;
     case ALL_GREEN_PATTERN:
-        for (uint32_t row = 0; (row < NUM_ROWS); row++) {
-            for (uint32_t col = 0; (col < NUM_COLS); col++) {
-                (*fBufsPtr)[bufNum][row][col] = GREEN_COLOR;
+        for (row = 0; (row < NUM_ROWS); row++) {
+            for (col = 0; (col < NUM_COLS); col++) {
+                renderPtr->setPixel(col, row, GREEN_COLOR);
             }
         }
         break;
     case ALL_AMBER_PATTERN:
-        for (uint32_t row = 0; (row < NUM_ROWS); row++) {
-            for (uint32_t col = 0; (col < NUM_COLS); col++) {
-                (*fBufsPtr)[bufNum][row][col] = AMBER_COLOR;
+        for (row = 0; (row < NUM_ROWS); row++) {
+            for (col = 0; (col < NUM_COLS); col++) {
+                renderPtr->setPixel(col, row, AMBER_COLOR);
             }
         }
         break;
     case STRIPES_PATTERN:
-        for (uint32_t col = 0; (col < NUM_COLS); col++) {
-            (*fBufsPtr)[bufNum][0][col] = RED_COLOR;
-            (*fBufsPtr)[bufNum][4][col] = RED_COLOR;
+        for (col = 0; (col < NUM_COLS); col++) {
+            renderPtr->setPixel(col, 0, RED_COLOR);
+            renderPtr->setPixel(col, 4, RED_COLOR);
         }
-        for (uint32_t col = 0; (col < NUM_COLS); col++) {
-            (*fBufsPtr)[bufNum][1][col] = GREEN_COLOR;
-            (*fBufsPtr)[bufNum][5][col] = GREEN_COLOR;
+        for (col = 0; (col < NUM_COLS); col++) {
+            renderPtr->setPixel(col, 1, GREEN_COLOR);
+            renderPtr->setPixel(col, 5, GREEN_COLOR);
         }
-        for (uint32_t col = 0; (col < NUM_COLS); col++) {
-            (*fBufsPtr)[bufNum][2][col] = AMBER_COLOR;
-            (*fBufsPtr)[bufNum][6][col] = AMBER_COLOR;
+        for (col = 0; (col < NUM_COLS); col++) {
+            renderPtr->setPixel(col, 2, AMBER_COLOR);
+            renderPtr->setPixel(col, 6, AMBER_COLOR);
         }
-        for (uint32_t col = 0; (col < NUM_COLS); col++) {
-            (*fBufsPtr)[bufNum][3][col] = 0;
+        for (col = 0; (col < NUM_COLS); col++) {
+            renderPtr->setPixel(col, 3, BLACK_COLOR);
         }
         break;
     case CHECK_PATTERN:
-        for (uint32_t row = 0; (row < NUM_ROWS); row++) {
-            for (uint32_t col = 0; (col < NUM_COLS); col++) {
-                (*fBufsPtr)[bufNum][row][col] = ((col + (row % NUM_COLORS)) % NUM_COLORS);
+        for (row = 0; (row < NUM_ROWS); row++) {
+            for (col = 0; (col < NUM_COLS); col++) {
+                renderPtr->setPixel(col, row, ((col + (row % NUM_COLORS)) % NUM_COLORS));
             }
         }
         break;
@@ -101,22 +108,21 @@ void patternBuf(uint32_t bufNum, uint32_t pattNum) {
     }
 };
 
+
 void setup() {
     // N.B. the delay values are necessary for correct function
     Serial.begin(115200);
-    delay(500);
+    delay(500); // TMP TMP TMP
     Serial.println("\nBEGIN: Render Loop");
-    render.????();
-    delay(500);
+    renderPtr = new Render();
     Serial.println("READY: Render Loop");
 };
 
 void setup1() {
-    delay(500);
     Serial.println("\nBEGIN: Refresh Loop");
-    renderPtr->
-    delay(1000);
-    Serial.println("Brightness: " + String(refreshPtr->getBrightness()) + "%");
+    renderPtr->refreshInit();
+    delay(500);
+    Serial.println("Brightness: " + String(renderPtr->getBrightness()) + "%");
     Serial.print("READY: Refresh Loop; ");
 };
 
@@ -144,63 +150,17 @@ void loop() {
         // at the start, fill one buf with chosen pattern
         pattern = ALL_AMBER_PATTERN; // CHECK_PATTERN
         if (loopCnt == 0) {
-            assert(rp2040.fifo.available());
-            renderBufNum = rp2040.fifo.pop();
-            patternBuf(renderBufNum, pattern);
-            rp2040.fifo.push(renderBufNum);
+            writePattern(pattern);
+            renderPtr->show();
         }
         break;
     case CYCLE_PATTERNS:
         numLoops = 3;
         if ((loopCnt % numLoops) == 0) {
-            if (rp2040.fifo.pop_nb(&renderBufNum)) {
-                pNum = ((pNum + 1) % NUM_PATTERNS);
-                patternBuf(renderBufNum, pNum);
-                rp2040.fifo.push(renderBufNum);
-//                Serial.println("Pattern #: " + String(pNum));
-            }
-        }
-        break;
-    case CYCLE_BRIGHTNESS:
-        numLoops = 10;
-        if ((loopCnt % numLoops) == 0) {
-            renderBufNum = rp2040.fifo.pop();
-            pattern = ALL_AMBER_PATTERN;
-            switch (refreshPtr->getBrightness()) {
-            case 0:
-                brightness = 22;
-                break;
-            case 25:
-                brightness = 50;
-                break;
-            case 50:
-                brightness = 75;
-                break;
-            case 75:
-                brightness = 100;
-                break;
-            case 100:
-                brightness = 0;
-                break;
-            default:
-                break;
-            }
-            refreshPtr->setBrightness(brightness);
-            patternBuf(renderBufNum, pattern);
-//            Serial.println("##: " + String(getBrightness()) + ", " + String(renderBufNum) + ", " + String(pattern));
-            rp2040.fifo.push(renderBufNum);
-        }
-        break;
-    case RAMP_BRIGHTNESS:
-        numLoops = 10;
-        if ((loopCnt % numLoops) == 0) {
-            renderBufNum = rp2040.fifo.pop();
-            pattern = ALL_AMBER_PATTERN;
-            brightness = ((refreshPtr->getBrightness() + 1) % 10);
-            refreshPtr->setBrightness(brightness);
-            patternBuf(renderBufNum, pattern);
-//            Serial.println("###: " + String(getBrightness()) + ", " + String(renderBufNum) + ", " + String(pattern));
-            rp2040.fifo.push(renderBufNum);
+            pNum = ((pNum + 1) % NUM_PATTERNS);
+            writePattern(pNum);
+            renderPtr->show();
+            Serial.println("Pattern #: " + String(pNum));
         }
         break;
     default:
@@ -214,5 +174,5 @@ void loop() {
 
 // Refresh loop
 void loop1() {
-    refreshPtr->refresh();
+    renderPtr->refresh();
 };
