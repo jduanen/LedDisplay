@@ -134,8 +134,8 @@ void Refresh::refresh() {
     if (BUF_NUM_VALID(_refreshBufNum)) {
         for (uint32_t color = 0; (color < NUM_LED_COLORS); color++) {
             assert((_refreshBufNum >= 0) && (_refreshBufNum < NUM_BUFS));
-            shiftInPixels(_refreshBufNum, _curRow, colors[color]);
-            enableRow(colors[color], _curRow);
+            shiftInPixels(_refreshBufNum, _curRow, LED_COLORS(color));
+            enableRow(LED_COLORS(color), _curRow);
             delayMicroseconds(_ledsOnDelay);
             disableRows();
         }
