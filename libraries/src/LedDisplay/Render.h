@@ -8,11 +8,6 @@
 
 #include "Refresh.h"
 
-#define BLACK_COLORLIGHTS   0b00000000
-#define GREEN_COLORLIGHTS   0b00000001
-#define RED_COLORLIGHTS     0b00000010
-#define AMBER_COLORLIGHTS   (GREEN_COLOR | RED_COLOR)
-
 
 class Render: public Refresh {
 public:
