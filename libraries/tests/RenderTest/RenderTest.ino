@@ -7,15 +7,7 @@
 #include "Render.h"
 
 
-#define PIXEL_DEPTH         2
-
-#define BLACK_COLOR         0b00000000
-#define GREEN_COLOR         0b00000001
-#define RED_COLOR           0b00000010
-#define AMBER_COLOR         (GREEN_COLOR | RED_COLOR)
-
-#define NUM_COLORS          4
-#define NUM_LED_COLORS      2
+#define PIXEL_DEPTH         BPP
 
 #define ALL_CLEAR_PATTERN   0
 #define ALL_RED_PATTERN     1
