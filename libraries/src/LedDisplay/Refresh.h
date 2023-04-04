@@ -12,8 +12,8 @@
 #define DEF_ROW_0           D0
 #define DEF_ROW_1           D1
 #define DEF_ROW_2           D2
-#define DEF_GREENS_ENB      D3
-#define DEF_REDS_ENB        D4
+#define DEF_REDS_ENB        D3
+#define DEF_GREENS_ENB      D4
 
 #define DEF_COL_DATA        D5
 #define DEF_COL_STROBE      D6
@@ -31,8 +31,8 @@
 #define MIN_LEDS_ON_DELAY   ROW_DELAY         //  1 msec (100% brightness)
 
 #define BLACK_COLOR         0b00000000
-#define GREEN_COLOR         0b00000001
-#define RED_COLOR           0b00000010
+#define RED_COLOR           0b00000001
+#define GREEN_COLOR         0b00000010
 #define AMBER_COLOR         (GREEN_COLOR | RED_COLOR)
 
 #define NUM_COLORS          4
