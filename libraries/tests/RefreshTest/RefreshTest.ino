@@ -43,7 +43,6 @@ uint32_t color;
 
 void writePattern(uint32_t bufNum, uint32_t pattNum) {
     uint32_t i;
- //   Refresh::frameBuffer *fBufsPtr = refreshPtr->getFrameBuffersPtr();
 
     row = 0;
     col = 0;
@@ -112,7 +111,6 @@ void writePattern(uint32_t bufNum, uint32_t pattNum) {
 void setup() {
     // N.B. the delay values are necessary for correct function
     Serial.begin(115200);
-    //delay(250); // TMP TMP TMP
     delay(500);
     Serial.println("\nBEGIN: Render Loop");
     refreshPtr = new Refresh();
@@ -120,9 +118,8 @@ void setup() {
 };
 
 void setup1() {
-    //delay(1000); // TMP TMP TMP
     Serial.println("\nBEGIN: Refresh Loop");
-    refreshPtr->freeAllBuffers();
+    refreshPtr->refreshInit();
     delay(1000);//300);  //// FIXME find why this is necessary
     Serial.print("READY: Refresh Loop; ");
     Serial.println("Brightness: " + String(refreshPtr->getBrightness()) + "%");
