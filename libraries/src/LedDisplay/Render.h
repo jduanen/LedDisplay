@@ -4,15 +4,9 @@
  * 
  ****************************************************************************/
 
-#ifndef _LED_DISPLAY_RENDER_H_
-#define _LED_DISPLAY_RENDER_H_
+#pragma once
 
 #include "Refresh.h"
-
-//// TMP TMP TMP
-#define NUM_BUFS            3
-#define NUM_COLS            ((8 + 8 + 1) * 5)
-#define NUM_ROWS            7
 
 #define BLACK_COLORLIGHTS   0b00000000
 #define GREEN_COLORLIGHTS   0b00000001
@@ -33,5 +27,3 @@ private:
 
 
 #include "Render.hpp"
-
-#endif // _LED_DISPLAY_RENDER_H_
