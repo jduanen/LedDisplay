@@ -4,8 +4,7 @@
  * 
  ****************************************************************************/
 
-#ifndef _LED_DISPLAY_REFRESH_H_
-#define _LED_DISPLAY_REFRESH_H_
+#pragma once
 
 
 #define DEF_BRIGHTNESS      50  // 50% brightness
@@ -38,12 +37,12 @@
 
 #define NUM_COLORS          4
 #define NUM_LED_COLORS      2
+#define BPP                 2
 
 
-#define BUF_NUM_VALID(num)  ((num >= 0) && (num < NUM_BUFS))
+#define BUF_NUM_VALID(num)  (((num) >= 0) && ((num) < NUM_BUFS))
 
-
-uint8_t colors[] = {GREEN_COLOR, RED_COLOR};
+#define LED_COLORS(COLOR_NUM)   (1 << (COLOR_NUM))  // 0: Green, 1: Red
 
 
 class Refresh {
@@ -85,7 +84,4 @@ class Refresh {
     void init();
 };
 
-#include "Refresh.hpp"
-
-
-#endif // _LED_DISPLAY_REFRESH_H_
+//#include "Refresh.hpp"
