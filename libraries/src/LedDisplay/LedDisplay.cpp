@@ -17,5 +17,6 @@ LedDisplay::~LedDisplay(void) {
 };
 
 void LedDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
-    Serial.println("drawPixel");
+//    Serial.println("drawPixel: " + String(x) + ", " + String(y) + ", " + String(color));
+    setPixel(((NUM_COLS - 1) - x), y, color);
 };
