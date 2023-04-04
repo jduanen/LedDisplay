@@ -4,6 +4,10 @@
  * 
  ****************************************************************************/
 
+#include <Arduino.h>
+#include "Render.h"
+
+
 Render::Render() {
     Serial.println("Render");
 };
