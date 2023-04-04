@@ -18,7 +18,7 @@
 class LedDisplay: public Adafruit_GFX, public Render {
 public:
     // NEW CONSTRUCTORS -- recommended for new projects
-    LedDisplay(uint8_t bpp=BPP, uint8_t w=NUM_ROWS, uint8_t h=NUM_COLS);
+    LedDisplay(uint8_t bpp=BPP, uint8_t w=NUM_COLS, uint8_t h=NUM_ROWS);
     ~LedDisplay(void);
 
     void drawPixel(int16_t x, int16_t y, uint16_t color);
