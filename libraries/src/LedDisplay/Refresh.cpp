@@ -10,7 +10,6 @@
 
 // N.B. run this in loop1
 Refresh::Refresh() {
-    Serial.println("\nRefresh Loop: BEGIN");
     init();
 };
 
@@ -18,7 +17,6 @@ Refresh::Refresh() {
 Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
                  uint8_t greenLedsEnable, uint8_t redLedsEnable,
                  uint8_t columnData, uint8_t columnStrobe, uint8_t columnClock) {
-//    Serial.println("\nRefresh Loop: BEGIN2");
     _row0 = row0;
     _row1 = row1;
     _row2 = row2;
@@ -31,7 +29,6 @@ Refresh::Refresh(uint8_t row0, uint8_t row1, uint8_t row2,
 };
 
 void Refresh::init() {
-    Serial.println("Refresh Init");
     pinMode(_row0, OUTPUT);
     pinMode(_row1, OUTPUT);
     pinMode(_row2, OUTPUT);
@@ -53,7 +50,7 @@ void Refresh::init() {
 
 Refresh::~Refresh() {
     //// give buffer back
-    Serial.println("Refresh stopped");
+    Serial.println("Refresh stopped"); //// TMP TMP TMP
 };
 
 void Refresh::setBrightness(byte percent) {
