@@ -29,7 +29,6 @@ public:
 
 private:
     uint8_t _renderBufNum = -1;
-
 };
 
 
