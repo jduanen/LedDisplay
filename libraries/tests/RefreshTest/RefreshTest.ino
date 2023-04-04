@@ -7,6 +7,7 @@
 #include "Refresh.h"
 
 
+/*
 #define PIXEL_DEPTH         2
 
 #define BLACK_COLOR         0b00000000
@@ -16,6 +17,7 @@
 
 #define NUM_COLORS          4
 #define NUM_LED_COLORS      2
+*/
 
 #define ALL_CLEAR_PATTERN   0
 #define ALL_RED_PATTERN     1
