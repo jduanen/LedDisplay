@@ -9,13 +9,6 @@
 #include <Adafruit_GFX.h>
 #include "Render.h"
 
-/*
-//// TMP TMP TMP
-#define NUM_BUFS            3
-#define NUM_COLS            ((8 + 8 + 1) * 5)
-#define NUM_ROWS            7
-*/
-
 
 // for backwards client compatability
 #define BLACK       BLACK_COLORLIGHTS     ///< Draw 'off' pixels
