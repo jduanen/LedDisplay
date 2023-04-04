@@ -8,7 +8,7 @@
 #include "ColorLights.h"
 
 
-ColorLights::ColorLights(uint8_t w, uint8_t h): Adafruit_GFX(w, h), _bpp(bpp) {
+ColorLights::ColorLights(uint8_t w, uint8_t h): Adafruit_GFX(w, h), _bpp(_bpp) {
     Serial.println("Create");
 };
 

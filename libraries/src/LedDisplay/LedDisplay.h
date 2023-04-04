@@ -12,8 +12,8 @@
 
 
 // for backwards client compatability
-#define BLACK               BLACK_COLORLIGHTS     ///< Draw 'off' pixels
-#define WHITE               AMBER_COLORLIGHTS     ///< Draw 'on' pixels
+#define BLACK       BLACK_COLORLIGHTS     ///< Draw 'off' pixels
+#define WHITE       AMBER_COLORLIGHTS     ///< Draw 'on' pixels
 
 
 class ColorLights: public Adafruit_GFX, Render {
