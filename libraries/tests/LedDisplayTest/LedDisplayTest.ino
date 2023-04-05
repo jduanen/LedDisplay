@@ -31,7 +31,7 @@ void setup1() {
     Serial.print("READY: Refresh Loop; Brightness: " + String(ledDisplayPtr->getBrightness()));
 };
 
-#define TEST_PAT_NUM    7
+#define TEST_PAT_NUM    8
 
 void loop() {
     switch (TEST_PAT_NUM) {
@@ -108,7 +108,7 @@ void loop() {
         break;
     case 8:
         ledDisplayPtr->setCursor(0, 0);
-        ledDisplayPtr->setTextColor(RED_COLOR, BLACK_COLOR);
+        ledDisplayPtr->setTextColor((loopCnt % NUM_COLORS), BLACK_COLOR);
         ledDisplayPtr->setTextSize(1);
         ledDisplayPtr->print("Hello World!");
         break;
