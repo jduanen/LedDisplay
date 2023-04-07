@@ -15,9 +15,12 @@
 #define DEF_REDS_ENB        D3
 #define DEF_GREENS_ENB      D4
 
-#define DEF_COL_DATA        D5
-#define DEF_COL_STROBE      D6
-#define DEF_COL_CLOCK       D7
+#define DEF_COL_DATA        D8
+#define DEF_COL_STROBE      D9
+#define DEF_COL_CLOCK       D5
+
+#define _TX_                D6
+#define _RX_                D7
 
 #define NUM_BUFS            3
 #define NUM_COLS            ((8 + 8 + 1) * 5)
