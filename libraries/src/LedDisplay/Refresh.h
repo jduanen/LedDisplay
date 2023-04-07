@@ -26,12 +26,12 @@
 #define NUM_COLS            ((8 + 8 + 1) * 5)
 #define NUM_ROWS            7
 
-#define ROW_DELAY           1000                // 1 msec (1KHz refresh rate)
+#define ROW_DELAY           1500    // 1.5 msec (667 Hz refresh rate)
 #define INTER_ROW_DELAY     (ROW_DELAY - _ledsOnDelay)
 
-#define MAX_LEDS_ON_DELAY   0                   //  0 msec (0% brightness)
-#define DEF_LEDS_ON_DELAY   (ROW_DELAY / 2)     // .5 msec (50% brightness)
-#define MIN_LEDS_ON_DELAY   ROW_DELAY           //  1 msec (100% brightness)
+#define MAX_LEDS_ON_DELAY   0       //   0 usec (0% brightness)
+#define DEF_LEDS_ON_DELAY   400     // 400 usec (50% brightness)
+#define MIN_LEDS_ON_DELAY   750     // 750 usec (100% brightness)
 
 #define BLACK_COLOR         0b00000000
 #define RED_COLOR           0b00000001
