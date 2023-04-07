@@ -119,13 +119,10 @@ void Refresh::refreshInit() {
 // N.B. run this in loop1
 void Refresh::refresh() {
     while (rp2040.fifo.available() > 0) {
-//        Serial.print("Refresh: avail=" + String(rp2040.fifo.available()) + ", ");
         if (BUF_NUM_VALID(_refreshBufNum)) {
             rp2040.fifo.push(_refreshBufNum);
-//            Serial.print("returned: " + String(_refreshBufNum) + ", ");
         }
         _refreshBufNum = rp2040.fifo.pop();  // blocking
-//        Serial.println("new refreshBufNum: " + String(_refreshBufNum));
     }
 
     if (BUF_NUM_VALID(_refreshBufNum)) {
