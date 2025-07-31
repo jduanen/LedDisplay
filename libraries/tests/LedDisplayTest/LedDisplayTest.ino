@@ -31,7 +31,7 @@ void setup1() {
     Serial.print("READY: Refresh Loop; Brightness: " + String(ledDisplayPtr->getBrightness()));
 };
 
-#define TEST_PAT_NUM    8
+#define TEST_PAT_NUM    1
 
 void loop() {
     switch (TEST_PAT_NUM) {
@@ -43,7 +43,8 @@ void loop() {
         }
         break;
     case 1:
-        ledDisplayPtr->fillScreen(loopCnt % NUM_COLORS);
+        color = AMBER_COLOR;
+        ledDisplayPtr->fillScreen(color);
         break;
     case 2:
         int x, y, color;
