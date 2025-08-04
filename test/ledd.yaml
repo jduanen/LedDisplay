@@ -1,12 +1,18 @@
 substitutions:
-  devicename: ledDisplay
+  devicename: leddisplay
   upper_devicename: LED_Display
+
+globals:
+  - id: page_index
+    type: int
+    restore_value: no
+    initial_value: '0'
 
 external_components:
   - source:
       type: git
       url: https://github.com/jduanen/ESPHomeComponents
-    components: [ ledDisplay ]
+    components: [ led_display ]
     refresh: always
 
 esphome:
@@ -52,16 +58,59 @@ web_server:
   port: 80
 
 display:
-  - platform: ledDisplay
+  - platform: led_display
     id: leds
-    rotation: 0
-    auto_clear_enabled: false
+    brightness: 50
+    #auto_clear_enabled: false
     update_interval: never
-    lambda: |-
-      it.print("Hello World");
+#    update_interval: 5s
+#    lambda: |-
+#      if (id(my_button).state) {
+#        it.print(0, 0, id(roboto), "A");
+#      } else {
+#        it.print(0, 0, id(roboto), " ");
+#      }
+#      it.print("Hello World");
 
-#lvgl:
-#  widgets:
-#    - label:
-#      align: CENTER
-#      text: "Hello World"
+font:
+  - file: "gfonts://Roboto"
+    id: roboto
+    size: 6
+
+binary_sensor:
+  - platform: gpio
+    pin: 0
+    name: "Button"
+    id: my_button
+    # debouncing option
+    filters:
+      - delayed_on: 20ms
+    on_press:
+      then:
+        - lambda: |-
+            id(page_index) += 1;
+            if (id(page_index) > 2) id(page_index) = 0;
+        - lvgl.label.update:
+            id: mylabel
+            text: !lambda |-
+              switch(id(page_index)) {
+                case 0: return "First Screen";
+                case 1: return "Second Screen";
+                case 2: return "Third Screen";
+                default: return "First Screen";
+              }
+
+lvgl:
+  displays:
+    - leds
+  widgets:
+    - label:
+        id: mylabel
+        align: CENTER
+        text: !lambda |-
+          switch(id(page_index)) {
+            case 0: return "First Screen";
+            case 1: return "Second Screen";
+            case 2: return "Third Screen";
+            default: return "First Screen";
+          }
