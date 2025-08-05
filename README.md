@@ -22,7 +22,7 @@ All of the LED anodes are connected to the seven rows (selected by the decoded o
 ##### Display Interface Signals
 
 | Pin |  Name    | Function           |
-|:---:|:--------:|:------------------:|
+|:---:|---------:|:-------------------|
 |  1  | Vcc      | +5VDC              |
 |  2  | GND      | Ground             |
 |  3  | Row_0    | Row Selector bit 0 |
@@ -60,17 +60,56 @@ A XIAO ESP32-S3 (dual-core 240MHz Tensilica microcontroller) ????
 
 ### Display Software
 
-The primary use of this display will be to generate output from Home Assistant, so the LVGL-based HA External Component is the main driver for this display.
+The primary use of this display will be to generate output from Home Assistant, so the Home Assistant External Component is the main driver for this display.
+
+By creating a driver for this display that inherits from the ESPHome Display Component, it is possible to render (through the use of lamdas) to the display with either the ESPHome native Rendering Engine, or LVGL (being careful not to mix them simultaneously on the same display or bad things will happen).
+
+The ESPHome External Components documentation can be found in: https://esphome.io/components/external_components.html.
+The ESPHome LVGL Component's interface is documented in: https://esphome.io/components/lvgl/.
 
 In addition to this, there's another driver that supports rendering with the Adafruit GFX library. This is intended for standalone display use, and is not being developed any further.
 
-#### ESPHome External Display Driver
+#### ESPHome External Component Display Driver
 
-????
+This display is integrated into Home Assistant by way of an External Component known as 'ledDisplay', and is found in 'git@github.com:jduanen/ESPHomeComponents.git'.
 
-#### Light and Versatile Graphics Library (LVGL)
+This component can be included in an ESPHome config file by adding these lines:
+```
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jduanen/ESPHomeComponents.git
+    components: [ ledDisplay ]
+    refresh: always
 
-????
+display:
+  - platform: ledDisplay
+    id: leds
+    rotation: 0
+    auto_clear_enabled: false
+    update_interval: never
+
+lvgl:
+  widgets:
+    - label:
+      align: CENTER
+      text: "Hello World"
+```
+
+This configuration picks up the display's driver code from github, and disables the auto_clear and update functions so that LVGL can handle the rendering and refresh functions itself.
+
+In this example, the LVGL library is included and a simple text string is written to the display. In addition, an `it` object can be used within lambdas in the config code to perform additional rendering operations on the display.
+
+Because the ``LedDisplay`` External Component implement is a subclass of the Display Rendering Engine interface (i.e., `display::DisplayBuffer`), it supports the LVGL rendering functionality and widgets, along with other rendering functions (related to the generation of QR Codes, Images, Animations, Graphs, etc.).
+
+In order for this display to be used with LGVL it must override the following methods:
+  * `draw_absolute_pixel_internal(x, y, color)`: to write individual pixels to the frame buffer
+  * `setup()`: initializes the HW and logs
+  * `dump_config()`: ????
+  * `update()`: draw or refresh the pixels and push them to the display with `flush()`
+  * `flush()`: LVGL uses to write the changed pixels within the given region to the display by looping over the given region of the display buffer and bit-banging the pixels onto the display HW
+
+In order to assist in generating the desired displays with the various render commands available, an ESPHome Display Simulator is available in https://github.com/Mat931/mat931.github.io. This provides a browser-based simulator of displays for ESPHome, that takes the display dimensions (in terms of its number of pixels in height and width) and provides a panel with the simulated display and a panel for entering rendering operations using an `it` object (which refers to the current display buffer's Rendering Engine object in ESPHome).
 
 ### Adafruit Display Driver
 
@@ -78,7 +117,9 @@ In the ColorLights directory, there's a library that lets the display be driven 
 
 This code is designed to run on a dual-core processor (e.g., RP2040), where the first core runs the Render loop, and the second core runs the Refresh loop.
 To use this library, start by including "LedDisplay.h" and instantiate an LedDisplay object (which inherits from the Adafruit_GFX class) in the first core, and call its refreshInit() method in the second core.
+
 Rendering is done to the display via calls to the LedDisplay's inherited Adafruit GFX methods from within the first core's main loop. Methods like drawPixel(), fillRect(), and drawFastHline() can be called, along with a color argument that selects one of the four possible colors for each pixel (i.e., Black, Red, Green, and Amber). When the show() method is invoked, the refresh function (running on the other core) will display the newly rendered pixels.
+
 The rate at which the render loop illuminates the pixels determines the brightness of the display. This value can be set to values between 0-100%. Brightness is defined for the entire display and so the LEDs will always have the same brightness.
 
 ### ESPHome MAX7219digit Emulator
