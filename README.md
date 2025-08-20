@@ -136,7 +136,7 @@ Other colors and fonts can be used by including special characters within the st
 ##### Rendering with Control Characters
 
 The custom display component offers a 'printLED(char \*str)' method that looks for escape sequences of the form -- "\\[<fontNum>;<colorNum>m" -- and makes the following characters use the font and color indicated by the single numeric digits given in the escape sequence.
-Note that Home Assistant Text Helpers do not recognize escape characters, so the '/e' or '/033' character is dropped from the ANSI escape sequence analogy used here, and just a plain backslash is used.
+Note that Home Assistant Text Helpers do not recognize escape characters, so the '/e' or '/033' character is dropped from the ANSI escape sequence analogy used here, and just a plain backslash is used. Also, the font indicator is used in place of style, and both font and color are restricted to a single numeric digit (in the range [0-9]).
 
 The font number digit refers to one of (up to ten) fonts defined in the config file. For the example yaml config file given above, the following mapping is defined:
 
