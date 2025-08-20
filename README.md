@@ -135,16 +135,18 @@ Other colors and fonts can be used by including special characters within the st
 
 ##### Rendering with Control Characters
 
-The custom display component offers a 'printLED(char \*str)' method that looks for escape sequences of the form -- "\033[<fontNum>;<colorNum>m" -- and makes the following characters use the font and color indicated by the single numeric digits given in the escape sequence.
+The custom display component offers a 'printLED(char \*str)' method that looks for escape sequences of the form -- "[<fontNum>;<colorNum>m" -- and makes the following characters use the font and color indicated by the single numeric digits given in the escape sequence.
+Note that Home Assistant Text Helpers do not recognize escape characters, so the '/e' or '/033' character is dropped from the ANSI escape sequence analogy used here.
 
 The font number digit refers to one of (up to ten) fonts defined in the config file. For the example yaml config file given above, the following mapping is defined:
 
 | Font Number |    Font Id    |
 |:-----------:|:--------------|
-| 0           | roboto        |
+| 0           | MT_Pixel_5x7  |
 | 1           | MatrixLight6  |
 | 2           | MatrixLight6X |
 | 3           | MatrixLight8  |
+| 4           | roboto        |
 
 The color digit maps to the display's colors in the following manner:
 
