@@ -37,13 +37,13 @@ All of the LED anodes are connected to the seven rows (selected by the decoded o
 
 ##### Power Supply
 
-The display is powered by 9VAC @ ?A power brick through a cannon plug on the back of the unit. There is an on-board 5VDC regulator that provides Vcc to the logic and the LEDs.
+The display was originally powered by 9VAC @ 4A power brick through a cannon plug on the back of the unit. There is an on-board 5VDC regulator that provides Vcc to the logic and the LEDs.
 
-[????I think I'm going to modify it to take a 5VDC@6A input instead????]
+I modified the board to use a 12VDC @ 4A power brick instead.
 
 ###### Power consumption measurements
 
-- Measured using the Adafruit GFX Brightness values with all LEDs on, and using an 8.5V supply voltage.
+I measured the display using the Adafruit GFX Brightness values with all LEDs on, and using an 8.5VDC supply voltage.
 
 | Brightness | Amps | Watts |
 |:----------:|-----:|-----: |
@@ -55,8 +55,7 @@ The display is powered by 9VAC @ ?A power brick through a cannon plug on the bac
 
 #### Display Controller
 
-A XIAO ESP32-S3 (dual-core 240MHz Tensilica microcontroller) ????
-????maybe use a XIAO ESP32-C3 (160MHz RISC-V) instead -- might not need to run Refresh function on second core with the new driver????
+I replaced the original 8047 controller with a XIAO ESP32-C3 (160MHz RISC-V processor) that controls the display and runs ESPHome code (which allows it to be driven by Home Assistant).
 
 ### Display Software
 
@@ -89,12 +88,77 @@ display:
     auto_clear_enabled: false
     update_interval: never
 
-lvgl:
-  widgets:
-    - label:
-      align: CENTER
-      text: "Hello World"
+display:
+  - platform: led_display
+    id: leds
+    intensity: 75
+    scroll_enable: true
+    scroll_mode: STOP
+    scroll_speed: 90ms
+    scroll_dwell: 400ms
+    scroll_delay: 1500ms
+    flip_x: false
+    update_interval: 5s
+    fonts:
+      - MT_Pixel_5x7
+      - MatrixLight6
+      - MatrixLight6X
+
+font:
+  - file: "fonts/5x7_MT_Pixel.ttf"
+    id: MT_Pixel_5x7
+    size: 7
+  - file: "fonts/MatrixLight6.ttf"
+    id: MatrixLight6
+    size: 6
+  - file: "fonts/MatrixLight6X.ttf"
+    id: MatrixLight6X
+    size: 6
+  - file: "fonts/MatrixLight8.ttf"
+    id: MatrixLight8
+    size: 8
+  - file: "gfonts://Roboto"
+    id: roboto
+    size: 7
+
+text_sensor:
+  - platform: homeassistant
+    name: "LED_DisplayText"
+    id: led_display_text
+    entity_id: input_text.led_display_text_input
 ```
+
+This configuration allows the display to be set with a string given in (either mobile or desktop) Home Assistant GUIs.
+
+By default, the 5x7, caps-only, font and red color are used to print whatever string is entered into the text input box on the GUI.
+Other colors and fonts can be used by including special characters within the string to be printed. The special characters are similar to the ANSI control sequences used to define colors and styles for character-oriented terminals.
+
+##### Rendering with Control Characters
+
+The custom display component offers a 'printLED(char \*str)' method that looks for escape sequences of the form -- "\033[<fontNum>;<colorNum>m" -- and makes the following characters use the font and color indicated by the single numeric digits given in the escape sequence.
+
+The font number digit refers to one of (up to ten) fonts defined in the config file. For the example yaml config file given above, the following mapping is defined:
+
+| Font Number |    Font Id    |
+|:-----------:|:--------------|
+| 0           | roboto        |
+| 1           | MatrixLight6  |
+| 2           | MatrixLight6X |
+| 3           | MatrixLight8  |
+
+The color digit maps to the display's colors in the following manner:
+
+| Color Number |    Color    |
+|:------------:|:------------|
+| 0            | Black       |
+| 1            | Red         |
+| 2            | Green       |
+| 3            | Amber       |
+
+Invalid font and color digits are ignored.
+
+
+##### Rendering with LVGL
 
 This configuration picks up the display's driver code from github, and disables the auto_clear and update functions so that LVGL can handle the rendering and refresh functions itself.
 
